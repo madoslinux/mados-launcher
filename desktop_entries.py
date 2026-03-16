@@ -200,9 +200,11 @@ def launch_application(exec_cmd):
     """Launch an application from its Exec command string."""
     try:
         args = shlex.split(exec_cmd)
+        home = os.path.expanduser("~")
         subprocess.Popen(
             args,
             start_new_session=True,
+            cwd=home,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
