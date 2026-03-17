@@ -27,10 +27,10 @@ NORD = {
 }
 
 # --- Dock Dimensions ---
-ICON_SIZE = 24  # Icon pixel size
+ICON_SIZE = 32  # Icon pixel size
 TAB_WIDTH = 14  # Width of the grip tab in pixels
-DOCK_WIDTH = 35  # Width of the icon area (icon + padding)
-TAB_HEIGHT = 54  # Height of the grip tab
+DOCK_WIDTH = 48  # Width of the icon area (icon + padding)
+TAB_HEIGHT = 72  # Height of the grip tab
 ICON_PADDING = 3  # Padding around each icon button
 ICON_SPACING = 2  # Spacing between icon buttons
 
@@ -79,7 +79,7 @@ CONFIG_DIR = os.path.expanduser("~/.config/mados-launcher")
 STATE_FILE = os.path.join(CONFIG_DIR, "state.json")
 
 # --- Icon Zoom on Hover ---
-ICON_ZOOM_SIZE = 32  # Target icon size on hover (pixels)
+ICON_ZOOM_SIZE = 44  # Target icon size on hover (pixels)
 ICON_ZOOM_STEP = 2  # Pixels per animation frame
 ICON_ZOOM_INTERVAL_MS = 25  # Milliseconds between animation frames
 

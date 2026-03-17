@@ -25,41 +25,45 @@ THEME_CSS = f"""
 }}
 
 #dock-bg {{
-    background-color: {NORD["nord0"]};
+    background-color: #1a1a1a;
     border-radius: 0 8px 8px 0;
-    border-left: none;
-    border-top: 1px solid {NORD["nord3"]};
-    border-right: 1px solid {NORD["nord3"]};
-    border-bottom: 1px solid {NORD["nord3"]};
+    border: 1px solid #4a4a4a;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 8px rgba(0,0,0,0.3);
 }}
 
 #icons-bg {{
-    background-color: {NORD["nord0"]};
+    background-color: transparent;
 }}
 
 /* ===== Grip Tab ===== */
 #grip-tab {{
-    background-color: {NORD["nord1"]};
+    background-image: linear-gradient(180deg, rgba(42,42,42,0.9) 0%, rgba(26,26,26,0.9) 100%);
     border-radius: 0 7px 7px 0;
+    border: 1px solid rgba(51,51,51,0.8);
+    border-left: none;
     min-width: 14px;
     padding: 0;
     transition: background-color 200ms ease;
 }}
 
 #grip-tab:hover {{
-    background-color: {NORD["nord2"]};
+    background-image: linear-gradient(180deg, rgba(58,58,58,0.95) 0%, rgba(42,42,42,0.95) 100%);
+    border-color: rgba(68,68,68,0.9);
 }}
 
 /* ===== Left Grip ===== */
 #left-grip {{
-    background-color: {NORD["nord1"]};
+    background-image: linear-gradient(180deg, rgba(42,42,42,0.9) 0%, rgba(26,26,26,0.9) 100%);
+    border: 1px solid rgba(51,51,51,0.8);
+    border-left: none;
     min-width: 14px;
     padding: 0;
     transition: background-color 200ms ease;
 }}
 
 #left-grip:hover {{
-    background-color: {NORD["nord2"]};
+    background-image: linear-gradient(180deg, rgba(58,58,58,0.95) 0%, rgba(42,42,42,0.95) 100%);
+    border-color: rgba(68,68,68,0.9);
 }}
 
 /* ===== Icons Scroll Area ===== */
@@ -100,12 +104,11 @@ THEME_CSS = f"""
 }}
 
 .launcher-icon:hover {{
-    background-color: {NORD["nord2"]};
-    box-shadow: 0 0 4px rgba(136, 192, 208, 0.3);
+    background-color: transparent;
 }}
 
 .launcher-icon:active {{
-    background-color: {NORD["nord3"]};
+    background-color: transparent;
 }}
 
 /* ===== Running App Indicator ===== */

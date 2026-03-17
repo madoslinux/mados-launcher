@@ -1,5 +1,6 @@
 """Main application class for the madOS Launcher dock."""
 
+import cairo
 import json
 import math
 import os
@@ -108,6 +109,10 @@ class LauncherApp:
         # Apply theme
         apply_theme()
 
+        # Faster tooltips (default is 500ms)
+        settings = Gtk.Settings.get_default()
+        settings.set_property("gtk-tooltip-timeout", 200)
+
         # Build window
         self._build_window()
         self._build_ui()
@@ -214,17 +219,15 @@ class LauncherApp:
         # Posicion X inicial del revealer (después de los grips) - mitad de espacio
         self._revealer_x = TAB_WIDTH  # 14px en lugar de 28px
 
-        # Capa 2 visual: fondo gris de 50px centrado verticalmente (margen de 50px arriba y abajo)
-        self._visual_bg = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-        self._visual_bg.set_name("dock-bg")
-        self._visual_bg.set_size_request(-1, 50)
+        # Capa 2 visual: fondo con Cairo - degrade negro semitransparente
+        self._visual_bg = Gtk.EventBox()
+        self._visual_bg.set_above_child(False)
+        self._visual_bg.set_size_request(100, 50)
+        self._visual_bg.connect("draw", self._on_draw_visual_bg)
         self._fixed.put(self._visual_bg, 0, 50)
 
-        # Fondo gris detras de los iconos (mismo tamaño que el grip, centrado verticalmente)
-        self._icons_bg = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-        self._icons_bg.set_name("icons-bg")
-        self._icons_bg.set_size_request(-1, 50)
-        self._fixed.put(self._icons_bg, self._revealer_x, 50)
+        # Fondo gris detras de los iconos (deshabilitado para ver el gradiente)
+        self._icons_bg = None
 
         # Capa 3: caja de iconos (150px de alto)
         self._icons_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
@@ -467,8 +470,10 @@ class LauncherApp:
             if child:
                 child.show_all()
                 width = child.get_allocated_width()
-                # Actualizar ancho del fondo de iconos
-                self._icons_bg.set_size_request(width, 50)
+                # Actualizar ancho del fondo visual y de iconos
+                self._visual_bg.set_size_request(width + 20, 50)
+                if self._icons_bg:
+                    self._icons_bg.set_size_request(width, 50)
                 # En expanded, poner grip derecho a la derecha del contenido
                 self._fixed.move(self._tab_event_box, self._revealer_x + width, self._tab_y)
                 # Grip izquierdo a la izquierda de los iconos
@@ -479,7 +484,9 @@ class LauncherApp:
             self._left_grip_event_box.hide()
             self._fixed.move(self._tab_event_box, 0, self._tab_y)
             # Fondo de iconos oculto
-            self._icons_bg.set_size_request(0, 50)
+            self._visual_bg.set_size_request(0, 50)
+            if self._icons_bg:
+                self._icons_bg.set_size_request(0, 50)
 
     # ------------------------------------------------------------------ #
     # Left grip drawing and interaction
@@ -516,6 +523,30 @@ class LauncherApp:
                 cr.arc(x, y, GRIP_DOT_RADIUS, 0, 2 * math.pi)
                 cr.fill()
 
+        return False
+
+    def _on_draw_visual_bg(self, widget, cr):
+        """Draw background with gradient and border."""
+        alloc = widget.get_allocation()
+        w, h = alloc.width, alloc.height
+
+        # Gradient from dark gray to black
+        grad = cairo.LinearGradient(0, 0, 0, h)
+        grad.add_color_stop_rgba(0, 0.15, 0.15, 0.15, 0.95)
+        grad.add_color_stop_rgba(1, 0.02, 0.02, 0.02, 0.95)
+        cr.set_source(grad)
+        cr.paint()
+
+        # Border
+        cr.set_source_rgba(0.3, 0.3, 0.3, 0.9)
+        cr.set_line_width(1)
+        cr.rectangle(0.5, 0.5, w-1, h-1)
+        cr.stroke()
+
+        return True
+
+    def _on_draw_icons_bg(self, widget, cr):
+        """Draw icons background area - transparent to show gradient."""
         return False
 
     def _on_left_grip_press(self, widget, event):
@@ -592,18 +623,17 @@ class LauncherApp:
         """Build an icon button for a single (ungrouped) entry."""
         # Capa 3: contenedor de icono de 150px de alto
         item_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        item_box.set_size_request(48, 150)
+        item_box.set_size_request(64, 150)
 
-        # Alignment para centrar el icono de 48px
+        # Alignment para centrar el icono
         align = Gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0, yscale=0)
-        align.set_size_request(48, 48)
+        align.set_size_request(ICON_SIZE + 8, ICON_SIZE + 8)
 
         btn = Gtk.Button()
         btn.get_style_context().add_class("launcher-icon")
         btn.set_tooltip_text(entry.name)
-        btn.set_tooltip_timeout(0)
         btn.set_relief(Gtk.ReliefStyle.NONE)
-        btn.set_size_request(48, 48)
+        btn.set_size_request(ICON_SIZE + 8, ICON_SIZE + 8)
 
         image = self._make_icon_image(entry)
         image.set_size_request(ICON_SIZE, ICON_SIZE)
@@ -619,7 +649,7 @@ class LauncherApp:
 
         # Indicator
         indicator = Gtk.DrawingArea()
-        indicator.set_size_request(48, 4)
+        indicator.set_size_request(ICON_SIZE + 8, 4)
         indicator.connect("draw", self._on_draw_indicator, entry)
 
         item_box.pack_start(align, True, True, 0)
@@ -632,19 +662,18 @@ class LauncherApp:
         """Build an icon button for a group of entries — click shows a popup submenu."""
         # Capa 3: contenedor de icono de 150px de alto
         item_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        item_box.set_size_request(48, 150)
+        item_box.set_size_request(ICON_SIZE + 8, 150)
 
         # Alignment para centrar el icono
         align = Gtk.Alignment(xalign=0.5, yalign=0.5, xscale=0, yscale=0)
-        align.set_size_request(48, 48)
+        align.set_size_request(ICON_SIZE + 8, ICON_SIZE + 8)
 
         btn = Gtk.Button()
         btn.get_style_context().add_class("launcher-icon")
         btn.get_style_context().add_class("launcher-group")
         btn.set_tooltip_text(f"{group.group_name} ({len(group.entries)})")
-        btn.set_tooltip_timeout(0)
         btn.set_relief(Gtk.ReliefStyle.NONE)
-        btn.set_size_request(48, 48)
+        btn.set_size_request(ICON_SIZE + 8, ICON_SIZE + 8)
 
         image = self._make_icon_image(group.representative)
         image.set_size_request(ICON_SIZE, ICON_SIZE)
@@ -660,7 +689,7 @@ class LauncherApp:
 
         # Indicator
         indicator = Gtk.DrawingArea()
-        indicator.set_size_request(48, 4)
+        indicator.set_size_request(ICON_SIZE + 8, 4)
         indicator.connect("draw", self._on_draw_group_indicator, group)
 
         item_box.pack_start(align, True, True, 0)

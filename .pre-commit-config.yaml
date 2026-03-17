@@ -1,0 +1,35 @@
+repos:
+  - repo: local
+    hooks:
+      - id: py-compile
+        name: Python syntax check
+        entry: python3 -m py_compile
+        language: system
+        types: [python]
+        pass_filenames: true
+
+      - id: py-compile-all
+        name: Compile all Python modules
+        entry: python3
+        args:
+          - -c
+          - |
+            import py_compile
+            import glob
+            import sys
+            errors = []
+            for f in glob.glob('**/*.py', recursive=True):
+                if '.git' in f or '__pycache__' in f:
+                    continue
+                try:
+                    py_compile.compile(f, doraise=True)
+                except Exception as e:
+                    errors.append(f"{f}: {e}")
+            if errors:
+                for e in errors:
+                    print(e)
+                sys.exit(1)
+            print("All modules compiled successfully")
+        language: system
+        pass_filenames: false
+        types: [python]
