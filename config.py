@@ -93,3 +93,6 @@ AVAHI_DESKTOP_FILES = {
 
 # --- Refresh ---
 REFRESH_INTERVAL_SECONDS = 30  # Rescan .desktop files every N seconds
+
+# --- Terminal ---
+TERMINAL_CMD = "foot -e"  # Command to run terminal apps (e.g., "foot -e", "kitty -e")

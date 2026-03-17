@@ -601,13 +601,14 @@ class LauncherApp:
         btn = Gtk.Button()
         btn.get_style_context().add_class("launcher-icon")
         btn.set_tooltip_text(entry.name)
+        btn.set_tooltip_timeout(0)
         btn.set_relief(Gtk.ReliefStyle.NONE)
         btn.set_size_request(48, 48)
 
         image = self._make_icon_image(entry)
         image.set_size_request(ICON_SIZE, ICON_SIZE)
         btn.add(image)
-        btn.connect("clicked", self._on_icon_clicked, entry.exec_cmd)
+        btn.connect("clicked", self._on_icon_clicked, entry.exec_cmd, entry.terminal)
 
         # Zoom on hover
         btn.add_events(Gdk.EventMask.ENTER_NOTIFY_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK)
@@ -641,6 +642,7 @@ class LauncherApp:
         btn.get_style_context().add_class("launcher-icon")
         btn.get_style_context().add_class("launcher-group")
         btn.set_tooltip_text(f"{group.group_name} ({len(group.entries)})")
+        btn.set_tooltip_timeout(0)
         btn.set_relief(Gtk.ReliefStyle.NONE)
         btn.set_size_request(48, 48)
 
@@ -736,26 +738,26 @@ class LauncherApp:
                 hbox.pack_end(dot, False, False, 0)
 
             row.add(hbox)
-            row.connect("clicked", self._on_popover_item_clicked, popover, entry.exec_cmd)
+            row.connect("clicked", self._on_popover_item_clicked, popover, entry.exec_cmd, entry.terminal)
             vbox.pack_start(row, False, False, 0)
 
         popover.add(vbox)
         popover.show_all()
         self._active_popover = popover
 
-    def _on_popover_item_clicked(self, button, popover, exec_cmd):
+    def _on_popover_item_clicked(self, button, popover, exec_cmd, terminal=False):
         """Launch app from popover and close it."""
         popover.popdown()
         btn = popover.get_relative_to()
         self._cancel_zoom_animation(btn)
-        launch_application(exec_cmd)
+        launch_application(exec_cmd, terminal)
         self._start_bounce_animation(btn)
         self._schedule_auto_collapse()
 
-    def _on_icon_clicked(self, button, exec_cmd):
+    def _on_icon_clicked(self, button, exec_cmd, terminal=False):
         """Launch the clicked application."""
         self._cancel_zoom_animation(button)
-        launch_application(exec_cmd)
+        launch_application(exec_cmd, terminal)
         self._start_bounce_animation(button)
         self._schedule_auto_collapse()
 

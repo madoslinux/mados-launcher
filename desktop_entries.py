@@ -24,9 +24,9 @@ _FIELD_CODE_RE = re.compile(r" ?%[fFuUdDnNickvm](?:\s|$)")
 class DesktopEntry:
     """Represents a parsed .desktop application entry."""
 
-    __slots__ = ("name", "icon_name", "exec_cmd", "comment", "categories", "filename", "pixbuf")
+    __slots__ = ("name", "icon_name", "exec_cmd", "comment", "categories", "filename", "pixbuf", "terminal")
 
-    def __init__(self, name, icon_name, exec_cmd, comment, categories, filename, pixbuf=None):
+    def __init__(self, name, icon_name, exec_cmd, comment, categories, filename, pixbuf=None, terminal=False):
         self.name = name
         self.icon_name = icon_name
         self.exec_cmd = exec_cmd
@@ -34,6 +34,7 @@ class DesktopEntry:
         self.categories = categories
         self.filename = filename
         self.pixbuf = pixbuf
+        self.terminal = terminal
 
 
 class EntryGroup:
@@ -181,6 +182,7 @@ def _parse_desktop_file(filepath, filename):
     comment = get("Comment", "")
     categories = get("Categories", "")
     exec_cmd = _clean_exec(raw_exec)
+    terminal = get("Terminal", "false").lower() == "true"
 
     # Resolve icon
     pixbuf = _resolve_icon(icon_name)
@@ -193,13 +195,17 @@ def _parse_desktop_file(filepath, filename):
         categories=categories,
         filename=filename,
         pixbuf=pixbuf,
+        terminal=terminal,
     )
 
 
-def launch_application(exec_cmd):
+def launch_application(exec_cmd, terminal=False):
     """Launch an application from its Exec command string."""
     try:
         args = shlex.split(exec_cmd)
+        if terminal:
+            terminal_cmd = _config.TERMINAL_CMD.split()
+            args = terminal_cmd + args
         home = os.path.expanduser("~")
         subprocess.Popen(
             args,
