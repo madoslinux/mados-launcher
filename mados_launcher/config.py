@@ -30,7 +30,7 @@ NORD = {
 ICON_SIZE = 32  # Icon pixel size
 TAB_WIDTH = 14  # Width of the grip tab in pixels
 DOCK_WIDTH = 48  # Width of the icon area (icon + padding)
-TAB_HEIGHT = 72  # Height of the grip tab
+TAB_HEIGHT = 52  # Height of the grip tab
 ICON_PADDING = 3  # Padding around each icon button
 ICON_SPACING = 2  # Spacing between icon buttons
 
@@ -46,7 +46,7 @@ GRIP_DOT_COL_GAP = 4  # Horizontal gap between dot columns
 # --- Drag Behavior ---
 DRAG_THRESHOLD = 5  # Pixels moved before a drag is recognized
 MIN_MARGIN_TOP = 0  # Minimum top margin
-DEFAULT_MARGIN_TOP = 200  # Default vertical position
+DEFAULT_MARGIN_TOP = 50  # Default vertical position
 
 # --- Shadow ---
 SHADOW_SIZE = 8  # Shadow spread in pixels

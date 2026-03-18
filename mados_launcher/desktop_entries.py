@@ -9,11 +9,12 @@ from configparser import ConfigParser
 
 import gi
 
-gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GdkPixbuf
+gi.require_version("Gtk", "4.0")
+gi.require_version("Gdk", "4.0")
+from gi.repository import Gtk, Gdk, GdkPixbuf
 
-from .config import EXCLUDED_DESKTOP, ICON_SIZE, AVAHI_DESKTOP_FILES
-from . import config as _config
+from mados_launcher.config import EXCLUDED_DESKTOP, ICON_SIZE, AVAHI_DESKTOP_FILES
+from mados_launcher import config as _config
 
 
 # Regex to strip field codes from Exec values (%f, %F, %u, %U, %d, %D, %n, %N, %i, %c, %k, %v, %m)
@@ -55,50 +56,16 @@ def _clean_exec(raw_exec):
 
 
 def _resolve_icon(icon_name, size=ICON_SIZE):
-    """Resolve an icon name to a GdkPixbuf, returning None on failure."""
+    """Resolve an icon name. In GTK4, we return the icon name for Gtk.Image to handle."""
     if not icon_name:
-        return _fallback_icon(size)
+        return None
 
-    # Absolute path to icon file
+    # Absolute path to icon file - return path so app can handle it
     if os.path.isabs(icon_name) and os.path.isfile(icon_name):
-        try:
-            return GdkPixbuf.Pixbuf.new_from_file_at_scale(icon_name, size, size, True)
-        except Exception:
-            return _fallback_icon(size)
+        return icon_name
 
-    # Icon theme lookup
-    theme = Gtk.IconTheme.get_default()
-    try:
-        icon_info = theme.lookup_icon(icon_name, size, Gtk.IconLookupFlags.FORCE_SIZE)
-        if icon_info:
-            return icon_info.load_icon()
-    except Exception:
-        pass
-
-    # Try without extension
-    name_no_ext = os.path.splitext(icon_name)[0] if "." in icon_name else None
-    if name_no_ext:
-        try:
-            icon_info = theme.lookup_icon(name_no_ext, size, Gtk.IconLookupFlags.FORCE_SIZE)
-            if icon_info:
-                return icon_info.load_icon()
-        except Exception:
-            pass
-
-    return _fallback_icon(size)
-
-
-def _fallback_icon(size=ICON_SIZE):
-    """Return a generic application icon as fallback."""
-    theme = Gtk.IconTheme.get_default()
-    for fallback in ("application-x-executable", "application-default-icon", "exec"):
-        try:
-            icon_info = theme.lookup_icon(fallback, size, Gtk.IconLookupFlags.FORCE_SIZE)
-            if icon_info:
-                return icon_info.load_icon()
-        except Exception:
-            continue
-    return None
+    # Return icon name - Gtk.Image will handle resolution
+    return icon_name
 
 
 def _is_avahi_running():
@@ -147,7 +114,7 @@ def scan_desktop_entries():
 def _parse_desktop_file(filepath, filename):
     """Parse a single .desktop file and return a DesktopEntry or None."""
     parser = ConfigParser(interpolation=None, strict=False)
-    parser.optionxform = str  # Preserve case of keys
+    parser.optionxform = lambda x: x  # Preserve case of keys
 
     try:
         parser.read(filepath, encoding="utf-8")

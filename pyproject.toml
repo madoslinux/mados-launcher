@@ -11,5 +11,9 @@ dependencies = [
     "pygobject",
 ]
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mados_launcher*"]
+
 [project.scripts]
 mados-launcher = "mados_launcher.__main__:main"
