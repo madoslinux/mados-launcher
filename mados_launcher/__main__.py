@@ -3,26 +3,19 @@
 
 import gi
 
-gi.require_version("Gtk", "4.0")
+gi.require_version("Gtk", "3.0")
 
-from gi.repository import Gtk, Gio
+from gi.repository import Gtk
 from mados_launcher.app import LauncherApp
 
 
-class LauncherApplication(Gtk.Application):
-    def __init__(self):
-        super().__init__(application_id="com.mados.launcher", flags=Gio.ApplicationFlags.NON_UNIQUE)
-        self.connect("activate", self.on_activate)
-
-    def on_activate(self, app):
-        self.launcher = LauncherApp()
-        self.add_window(self.launcher.window)
-        self.launcher.window.present()
-
-
 def main():
-    app = LauncherApplication()
-    app.run(None)
+    """Launch the madOS dock application."""
+    if not Gtk.init_check():
+        print("Failed to initialize GTK")
+        return
+    LauncherApp()
+    Gtk.main()
 
 
 if __name__ == "__main__":

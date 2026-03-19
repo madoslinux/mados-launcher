@@ -9,9 +9,9 @@ from configparser import ConfigParser
 
 import gi
 
-gi.require_version("Gtk", "4.0")
-gi.require_version("Gdk", "4.0")
-from gi.repository import Gtk, Gdk, GdkPixbuf
+gi.require_version("Gtk", "3.0")
+gi.require_version("GdkPixbuf", "2.0")
+from gi.repository import Gtk, GdkPixbuf
 
 from mados_launcher.config import EXCLUDED_DESKTOP, ICON_SIZE, AVAHI_DESKTOP_FILES
 from mados_launcher import config as _config
@@ -25,9 +25,28 @@ _FIELD_CODE_RE = re.compile(r" ?%[fFuUdDnNickvm](?:\s|$)")
 class DesktopEntry:
     """Represents a parsed .desktop application entry."""
 
-    __slots__ = ("name", "icon_name", "exec_cmd", "comment", "categories", "filename", "pixbuf", "terminal")
+    __slots__ = (
+        "name",
+        "icon_name",
+        "exec_cmd",
+        "comment",
+        "categories",
+        "filename",
+        "pixbuf",
+        "terminal",
+    )
 
-    def __init__(self, name, icon_name, exec_cmd, comment, categories, filename, pixbuf=None, terminal=False):
+    def __init__(
+        self,
+        name,
+        icon_name,
+        exec_cmd,
+        comment,
+        categories,
+        filename,
+        pixbuf=None,
+        terminal=False,
+    ):
         self.name = name
         self.icon_name = icon_name
         self.exec_cmd = exec_cmd
@@ -56,16 +75,22 @@ def _clean_exec(raw_exec):
 
 
 def _resolve_icon(icon_name, size=ICON_SIZE):
-    """Resolve an icon name. In GTK4, we return the icon name for Gtk.Image to handle."""
+    """Resolve an icon name to a GdkPixbuf."""
     if not icon_name:
         return None
 
-    # Absolute path to icon file - return path so app can handle it
     if os.path.isabs(icon_name) and os.path.isfile(icon_name):
-        return icon_name
+        try:
+            return GdkPixbuf.Pixbuf.new_from_file_at_size(icon_name, size, size)
+        except Exception:
+            return None
 
-    # Return icon name - Gtk.Image will handle resolution
-    return icon_name
+    icon_theme = Gtk.IconTheme.get_default()
+    try:
+        pixbuf = icon_theme.load_icon(icon_name, size, 0)
+        return pixbuf
+    except Exception:
+        return None
 
 
 def _is_avahi_running():

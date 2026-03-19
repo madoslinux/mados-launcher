@@ -80,8 +80,8 @@ STATE_FILE = os.path.join(CONFIG_DIR, "state.json")
 
 # --- Icon Zoom on Hover ---
 ICON_ZOOM_SIZE = 44  # Target icon size on hover (pixels)
-ICON_ZOOM_STEP = 2  # Pixels per animation frame
-ICON_ZOOM_INTERVAL_MS = 25  # Milliseconds between animation frames
+ICON_ZOOM_STEP = 4  # Pixels per animation frame
+ICON_ZOOM_INTERVAL_MS = 10  # Milliseconds between animation frames
 
 # --- Service-Dependent Filtering ---
 # Desktop entry filenames to hide when avahi-daemon is not running

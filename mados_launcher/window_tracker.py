@@ -5,6 +5,8 @@ import os
 import shutil
 import subprocess
 
+from mados_launcher.logger import log
+
 
 def _detect_compositor():
     """Detect which Wayland compositor is running: 'sway', 'hyprland', or None."""
@@ -90,14 +92,15 @@ def _query_hyprland_windows():
         clients = json.loads(result.stdout)
         windows = []
         for c in clients:
+            app_class = c.get("class") or ""
             windows.append(
                 {
-                    "app_id": (c.get("class") or "").lower(),
-                    "wm_class": (c.get("class") or "").lower(),
+                    "app_id": app_class.lower(),
+                    "wm_class": app_class.lower(),
                     "name": c.get("title", ""),
                     "urgent": c.get("urgent", False),
                     "pid": c.get("pid", 0),
-                    "focused": c.get("focusHistoryID", -1) == 0,
+                    "focused": c.get("focused", False),
                 }
             )
         return windows
@@ -191,15 +194,18 @@ class WindowTracker:
         if not match_key:
             return False
 
-        # Direct match against app_id/wm_class
-        if match_key in self._running:
-            return True
+        # Direct match against app_id/wm_class (case-insensitive)
+        match_key_lower = match_key.lower()
+        for running_key in self._running:
+            if running_key.lower() == match_key_lower:
+                return True
 
         # Also try the desktop filename without extension as app_id
         if desktop_filename:
             base = desktop_filename.replace(".desktop", "").lower()
-            if base in self._running:
-                return True
+            for running_key in self._running:
+                if running_key.lower() == base:
+                    return True
 
         return False
 
