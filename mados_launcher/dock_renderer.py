@@ -118,19 +118,3 @@ class DockRenderer:
                 dx = center_x + offset
                 cr.arc(dx, dy, GRIP_DOT_RADIUS, 0, 2 * math.pi)
                 cr.fill()
-
-    def draw_indicator(self, cr, cx: float, cy: float, state: str):
-        """Draw indicator dot: running, focused, or urgent."""
-        if state == "urgent":
-            color = hex_to_rgb(NORD["nord12"])
-            radius = 3.5
-        elif state == "focused":
-            color = hex_to_rgb(NORD["nord8"])
-            radius = 3.5
-        else:
-            color = hex_to_rgb(NORD["nord9"])
-            radius = 3.0
-
-        cr.set_source_rgb(*color)
-        cr.arc(cx, cy, radius, 0, 2 * math.pi)
-        cr.fill()
