@@ -70,8 +70,10 @@ EXCLUDED_DESKTOP = {
     "foot-server.desktop",
     "footclient.desktop",
     "htop.desktop",
+    "btop.desktop",
     "mados-equalizer.desktop",
     "vim.desktop",
+    "gufw.desktop",
 }
 
 # --- State Persistence ---
