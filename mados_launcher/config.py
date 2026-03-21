@@ -74,6 +74,12 @@ EXCLUDED_DESKTOP = {
     "mados-equalizer.desktop",
     "vim.desktop",
     "gufw.desktop",
+    # LibreOffice - only keep Writer, Calc, Impress
+    "libreoffice-startcenter.desktop",
+    "libreoffice-draw.desktop",
+    "libreoffice-base.desktop",
+    "libreoffice-math.desktop",
+    "libreoffice-xsltfilter.desktop",
 }
 
 # --- State Persistence ---
