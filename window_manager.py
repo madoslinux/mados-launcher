@@ -7,7 +7,7 @@ gi.require_version("Gdk", "3.0")
 
 from gi.repository import Gtk, Gdk
 
-import . __app_id__, __app_name__
+from . import __app_id__, __app_name__
 from .config import DEFAULT_MARGIN_TOP
 from .logger import log
 
