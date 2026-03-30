@@ -3,8 +3,8 @@
 import json
 import os
 
-from mados_launcher.config import CONFIG_DIR, STATE_FILE, DEFAULT_MARGIN_TOP
-from mados_launcher.logger import log
+from .config import CONFIG_DIR, STATE_FILE, DEFAULT_MARGIN_TOP
+from .logger import log
 
 
 class StateManager:

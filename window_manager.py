@@ -7,9 +7,9 @@ gi.require_version("Gdk", "3.0")
 
 from gi.repository import Gtk, Gdk
 
-from mados_launcher import __app_id__, __app_name__
-from mados_launcher.config import DEFAULT_MARGIN_TOP
-from mados_launcher.logger import log
+import . __app_id__, __app_name__
+from .config import DEFAULT_MARGIN_TOP
+from .logger import log
 
 HAS_LAYER_SHELL = False
 try:

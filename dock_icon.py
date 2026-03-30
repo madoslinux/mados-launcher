@@ -8,9 +8,9 @@ gi.require_version("GdkPixbuf", "2.0")
 
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
-from mados_launcher.config import TAB_HEIGHT, ICON_SIZE
-from mados_launcher.desktop_entries import launch_application
-from mados_launcher.logger import log
+from .config import TAB_HEIGHT, ICON_SIZE
+from .desktop_entries import launch_application
+from .logger import log
 
 ICON_SIZE_FIXED = 32
 

@@ -3,7 +3,7 @@
 import cairo
 import math
 
-from mados_launcher.config import (
+from .config import (
     NORD,
     TAB_WIDTH,
     TAB_HEIGHT,

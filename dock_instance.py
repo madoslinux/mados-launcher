@@ -7,12 +7,12 @@ gi.require_version("Gdk", "3.0")
 
 from gi.repository import Gtk, Gdk, GLib
 
-from mados_launcher.config import TAB_WIDTH, TAB_HEIGHT
-from mados_launcher.dock_renderer import DockRenderer
-from mados_launcher.dock_icon import DockIcon
-from mados_launcher.desktop_entries import scan_desktop_entries, group_entries
-from mados_launcher.window_tracker import WindowTracker
-from mados_launcher.logger import log
+from .config import TAB_WIDTH, TAB_HEIGHT
+from .dock_renderer import DockRenderer
+from .dock_icon import DockIcon
+from .desktop_entries import scan_desktop_entries, group_entries
+from .window_tracker import WindowTracker
+from .logger import log
 
 
 class DockInstance:

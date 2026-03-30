@@ -6,7 +6,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 
 from gi.repository import Gtk
-from mados_launcher.app import LauncherApp
+from .app import LauncherApp
 
 
 def main():

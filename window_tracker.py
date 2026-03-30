@@ -5,7 +5,7 @@ import os
 import shutil
 import subprocess
 
-from mados_launcher.logger import log
+from .logger import log
 
 
 def _detect_compositor():
