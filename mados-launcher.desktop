@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=madOS Launcher
+Comment=Dock launcher for Wayland
+Exec=/usr/local/bin/mados-launcher
+Icon=system-run
+Terminal=false
+Type=Application
+Categories=System;
+StartupWMClass=mados-launcher
+StartupNotify=true
