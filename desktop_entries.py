@@ -13,8 +13,8 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gtk, GdkPixbuf
 
-from .config import EXCLUDED_DESKTOP, ICON_SIZE, AVAHI_DESKTOP_FILES
-import . config as _config
+from config import EXCLUDED_DESKTOP, ICON_SIZE, AVAHI_DESKTOP_FILES
+import config as _config
 
 
 # Regex to strip field codes from Exec values (%f, %F, %u, %U, %d, %D, %n, %N, %i, %c, %k, %v, %m)

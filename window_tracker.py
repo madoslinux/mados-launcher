@@ -5,7 +5,7 @@ import os
 import shutil
 import subprocess
 
-from .logger import log
+from logger import log
 
 
 def _detect_compositor():

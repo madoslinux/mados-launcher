@@ -7,12 +7,12 @@ gi.require_version("Gdk", "3.0")
 
 from gi.repository import Gtk, Gdk, GLib
 
-from .config import REFRESH_INTERVAL_SECONDS
-from .window_manager import WindowManager
-from .state_manager import StateManager
-from .dock_instance import DockInstance
-from .window_tracker import WindowTracker
-from .logger import log
+from config import REFRESH_INTERVAL_SECONDS
+from window_manager import WindowManager
+from state_manager import StateManager
+from dock_instance import DockInstance
+from window_tracker import WindowTracker
+from logger import log
 
 WINDOW_POLL_MS = 2000
 

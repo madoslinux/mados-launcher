@@ -7,9 +7,9 @@ gi.require_version("Gdk", "3.0")
 
 from gi.repository import Gtk, Gdk
 
-from . import __app_id__, __app_name__
-from .config import DEFAULT_MARGIN_TOP
-from .logger import log
+from __init__ import __app_id__, __app_name__
+from config import DEFAULT_MARGIN_TOP
+from logger import log
 
 HAS_LAYER_SHELL = False
 try:

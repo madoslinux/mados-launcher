@@ -3,7 +3,7 @@
 import cairo
 import math
 
-from .config import (
+from config import (
     NORD,
     TAB_WIDTH,
     TAB_HEIGHT,

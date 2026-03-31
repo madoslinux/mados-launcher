@@ -3,8 +3,8 @@
 import json
 import os
 
-from .config import CONFIG_DIR, STATE_FILE, DEFAULT_MARGIN_TOP
-from .logger import log
+from config import CONFIG_DIR, STATE_FILE, DEFAULT_MARGIN_TOP
+from logger import log
 
 
 class StateManager:
