@@ -104,3 +104,7 @@ REFRESH_INTERVAL_SECONDS = 30  # Rescan .desktop files every N seconds
 
 # --- Terminal ---
 TERMINAL_CMD = "foot -e"  # Command to run terminal apps (e.g., "foot -e", "kitty -e")
+
+# --- Database ---
+APP_DB_PATH = os.path.join(CONFIG_DIR, "apps.db")
+GDKSUDO_CMD = "gksudo"  # Command for launching apps with sudo

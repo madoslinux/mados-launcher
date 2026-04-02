@@ -268,3 +268,9 @@ def group_entries(entries):
 
     result.sort(key=sort_key)
     return result
+
+
+def scan_and_sync(db):
+    """Scan desktop entries and sync with database. Returns (added, updated, removed)."""
+    entries = scan_desktop_entries()
+    return db.sync_from_desktop_files(entries)

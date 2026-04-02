@@ -7,11 +7,12 @@ gi.require_version("Gdk", "3.0")
 
 from gi.repository import Gtk, Gdk, GLib
 
-from config import REFRESH_INTERVAL_SECONDS
+from config import REFRESH_INTERVAL_SECONDS, APP_DB_PATH
 from window_manager import WindowManager
 from state_manager import StateManager
 from dock_instance import DockInstance
 from window_tracker import WindowTracker
+from database import AppDatabase
 from logger import log
 
 WINDOW_POLL_MS = 2000
@@ -30,10 +31,18 @@ class LauncherApp:
         self._entries = []
         self._grouped = []
         self._dock_instances = []
+        self._settings_window = None
 
         self._state = StateManager()
         state = self._state.load()
         self._margin_top = state["margin_top"]
+        self._expanded_per_monitor = state.get("expanded_per_monitor", {})
+        self._expanded_default = bool(state.get("expanded", False))
+
+        self._db = AppDatabase(APP_DB_PATH)
+
+        from desktop_entries import scan_and_sync
+        scan_and_sync(self._db)
 
         self._win_mgr = WindowManager(self._margin_top)
         self._tracker = WindowTracker()
@@ -47,7 +56,6 @@ class LauncherApp:
             dock.set_expanded(False)
 
         GLib.timeout_add_seconds(REFRESH_INTERVAL_SECONDS, self._refresh_entries)
-        GLib.timeout_add(WINDOW_POLL_MS, self._poll_window_state)
         GLib.timeout_add(WINDOW_POLL_MS, self._poll_window_state)
 
         log.info("LauncherApp ready")
@@ -81,7 +89,25 @@ class LauncherApp:
     def dismiss_popovers(self):
         pass
 
+    def get_database(self):
+        return self._db
+
+    def open_settings(self):
+        from settings_window import SettingsWindow
+        if self._settings_window is None:
+            self._settings_window = SettingsWindow(self._db, self._on_settings_closed)
+        self._settings_window.present()
+
+    def _on_settings_closed(self):
+        self._settings_window = None
+        for dock in self._dock_instances:
+            dock.refresh_icons()
+
     def _refresh_entries(self):
+        from desktop_entries import scan_and_sync
+        added, updated, removed = scan_and_sync(self._db)
+        if added or updated or removed:
+            log.info(f"DB sync: added={added}, updated={updated}, removed={removed}")
         return True
 
     def _poll_window_state(self):
