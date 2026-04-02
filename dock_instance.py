@@ -184,6 +184,9 @@ class DockInstance:
 
     def _on_tab_release(self, widget, event):
         log.info(f"Dock {self._index}: RIGHT grip release")
+        if event.button == 3:
+            self._show_tab_context_menu(event)
+            return True
         if event.button != 1:
             return True
 
@@ -268,8 +271,12 @@ class DockInstance:
 
     def _update_grip_position(self):
         if self._expanded:
-            width = self._icons_box.get_allocated_width() or TAB_WIDTH
-            self._fixed.move(self._tab_event_box, self._revealer_x + width, self._tab_y)
+            icon_area_width = max(0, len(self._dock_icons) * ICON_SLOT_WIDTH)
+            self._fixed.move(
+                self._tab_event_box,
+                self._revealer_x + icon_area_width,
+                self._tab_y,
+            )
             self._fixed.move(self._left_grip_event_box, 0, self._tab_y)
         else:
             self._fixed.move(self._tab_event_box, 0, self._tab_y)
@@ -631,15 +638,21 @@ class DockInstance:
         import cairo
 
         region = cairo.Region()
-        region.union(cairo.RectangleInt(0, self._tab_y, TAB_WIDTH, TAB_HEIGHT))
-
         if self._expanded:
-            icons_alloc = self._icons_box.get_allocation()
-            if icons_alloc.width > 0:
-                region.union(cairo.RectangleInt(
-                    self._revealer_x, self._tab_y,
-                    icons_alloc.width, icons_alloc.height
-                ))
+            icon_area_width = max(0, len(self._dock_icons) * ICON_SLOT_WIDTH)
+            right_tab_x = self._revealer_x + icon_area_width
+            region.union(cairo.RectangleInt(0, self._tab_y, TAB_WIDTH, TAB_HEIGHT))
+            region.union(
+                cairo.RectangleInt(
+                    self._revealer_x,
+                    self._tab_y,
+                    icon_area_width,
+                    TAB_HEIGHT,
+                )
+            )
+            region.union(cairo.RectangleInt(right_tab_x, self._tab_y, TAB_WIDTH, TAB_HEIGHT))
+        else:
+            region.union(cairo.RectangleInt(0, self._tab_y, TAB_WIDTH, TAB_HEIGHT))
 
         gdk_window.input_shape_combine_region(region, 0, 0)
 
@@ -648,9 +661,10 @@ class DockInstance:
         if self._expanded:
             n_icons = len(self._dock_icons)
             icon_area_width = n_icons * 52 if n_icons > 0 else 0
-            width = TAB_WIDTH + icon_area_width
+            width = TAB_WIDTH + icon_area_width + TAB_WIDTH
         else:
             width = TAB_WIDTH
 
         self._window.resize(width, TAB_HEIGHT)
+        self._update_grip_position()
         self._update_input_shape()
