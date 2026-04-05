@@ -74,6 +74,11 @@ class AppDatabase:
         """Get a database connection."""
         return sqlite3.connect(self._db_path)
 
+    def _should_force_sudo(self, name: str, exec_cmd: str) -> bool:
+        """Return True when app should always run with sudo by default."""
+        text = f"{name} {exec_cmd}".lower()
+        return "gufw" in text
+
     def get_all_apps(self) -> list[dict]:
         """Get all applications ordered by position."""
         with self._get_conn() as conn:
@@ -116,12 +121,13 @@ class AppDatabase:
         """Add a new application from a DesktopEntry."""
         max_pos = self._get_max_position()
         now = int(datetime.now().timestamp())
+        launch_sudo = 1 if self._should_force_sudo(entry.name, entry.exec_cmd) else 0
         with self._get_conn() as conn:
             cursor = conn.execute(
                 """
                 INSERT OR IGNORE INTO apps 
-                (name, exec_cmd, icon_name, comment, categories, filename, terminal, group_mode, group_key, allow_auto_group, position, last_updated)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (name, exec_cmd, icon_name, comment, categories, filename, terminal, launch_sudo, group_mode, group_key, allow_auto_group, position, last_updated)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     entry.name,
@@ -131,6 +137,7 @@ class AppDatabase:
                     entry.categories,
                     entry.filename,
                     int(entry.terminal),
+                    launch_sudo,
                     "auto",
                     "",
                     1,
@@ -278,6 +285,10 @@ class AppDatabase:
                 if existing["terminal"] != int(entry.terminal):
                     update_fields["terminal"] = int(entry.terminal)
                     needs_update = True
+                if self._should_force_sudo(entry.name, entry.exec_cmd):
+                    if existing.get("launch_sudo", 0) != 1:
+                        update_fields["launch_sudo"] = 1
+                        needs_update = True
 
                 if needs_update:
                     update_fields["last_updated"] = now
