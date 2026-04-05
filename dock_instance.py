@@ -20,6 +20,7 @@ GROUP_DROP_RADIUS = 12
 PUSH_OFFSET = 14
 DRAG_START_DELAY_S = 0.15
 ICONS_BOX_Y_OFFSET = -2
+ICONS_BOX_HEIGHT = TAB_HEIGHT - 2
 
 
 class DockInstance:
@@ -62,7 +63,7 @@ class DockInstance:
 
         # Icons box (same position and height as grip)
         self._icons_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-        self._icons_box.set_size_request(-1, TAB_HEIGHT)
+        self._icons_box.set_size_request(-1, ICONS_BOX_HEIGHT)
         self._fixed.put(self._icons_box, self._revealer_x, self._icons_box_y)
 
         # Add background styling to icons box via CSS - same height as grip
@@ -74,7 +75,7 @@ class DockInstance:
             }
         """)
         self._icons_box.set_name("dock-icons")
-        self._icons_box.set_size_request(-1, TAB_HEIGHT)
+        self._icons_box.set_size_request(-1, ICONS_BOX_HEIGHT)
         self._icons_box.get_style_context().add_provider(
             provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
@@ -526,7 +527,7 @@ class DockInstance:
             return
         self._insert_indicator = Gtk.EventBox()
         self._insert_indicator.set_visible_window(True)
-        self._insert_indicator.set_size_request(3, TAB_HEIGHT - 4)
+        self._insert_indicator.set_size_request(3, ICONS_BOX_HEIGHT - 2)
         provider = Gtk.CssProvider()
         provider.load_from_data(
             b"#drop-indicator { background: rgba(136, 192, 208, 0.95); border-radius: 2px; }"
@@ -649,7 +650,7 @@ class DockInstance:
                     self._revealer_x,
                     self._icons_box_y,
                     icon_area_width,
-                    TAB_HEIGHT,
+                    ICONS_BOX_HEIGHT,
                 )
             )
             region.union(cairo.RectangleInt(right_tab_x, self._tab_y, TAB_WIDTH, TAB_HEIGHT))
