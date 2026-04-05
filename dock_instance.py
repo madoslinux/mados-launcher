@@ -19,6 +19,7 @@ ICON_SLOT_WIDTH = 52
 GROUP_DROP_RADIUS = 12
 PUSH_OFFSET = 14
 DRAG_START_DELAY_S = 0.15
+ICONS_BOX_Y_OFFSET = -2
 
 
 class DockInstance:
@@ -56,12 +57,13 @@ class DockInstance:
         self._window.add(self._fixed)
 
         self._tab_y = (150 - TAB_HEIGHT) // 2
+        self._icons_box_y = self._tab_y + ICONS_BOX_Y_OFFSET
         self._revealer_x = TAB_WIDTH
 
         # Icons box (same position and height as grip)
         self._icons_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         self._icons_box.set_size_request(-1, TAB_HEIGHT)
-        self._fixed.put(self._icons_box, self._revealer_x, self._tab_y)
+        self._fixed.put(self._icons_box, self._revealer_x, self._icons_box_y)
 
         # Add background styling to icons box via CSS - same height as grip
         provider = Gtk.CssProvider()
@@ -533,7 +535,7 @@ class DockInstance:
         self._insert_indicator.get_style_context().add_provider(
             provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
-        self._fixed.put(self._insert_indicator, self._revealer_x, self._tab_y + 2)
+        self._fixed.put(self._insert_indicator, self._revealer_x, self._icons_box_y + 2)
 
     def _show_insert_indicator(self, insert_index: int):
         if insert_index is None:
@@ -542,7 +544,7 @@ class DockInstance:
         if not self._insert_indicator:
             return
         x = self._revealer_x + (insert_index * ICON_SLOT_WIDTH) - 1
-        self._fixed.move(self._insert_indicator, x, self._tab_y + 2)
+        self._fixed.move(self._insert_indicator, x, self._icons_box_y + 2)
         self._insert_indicator.show()
 
     def _hide_insert_indicator(self):
@@ -645,7 +647,7 @@ class DockInstance:
             region.union(
                 cairo.RectangleInt(
                     self._revealer_x,
-                    self._tab_y,
+                    self._icons_box_y,
                     icon_area_width,
                     TAB_HEIGHT,
                 )

@@ -188,6 +188,7 @@ class DockIcon:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
+            self._schedule_collapse_after_launch()
         except Exception as e:
             log.error(f"Failed to launch '{exec_cmd}': {e}")
 
@@ -261,8 +262,13 @@ class DockIcon:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
+            self._schedule_collapse_after_launch()
         except Exception as e:
             log.error(f"Failed to launch '{exec_cmd}': {e}")
+
+    def _schedule_collapse_after_launch(self):
+        if self._dock_instance:
+            GLib.timeout_add_seconds(2, self._collapse_dock)
 
     def _on_hide_app(self, _):
         db = self._dock_instance._app.get_database()
