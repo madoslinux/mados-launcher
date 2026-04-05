@@ -17,6 +17,8 @@ from logger import log
 
 ICON_SIZE_FIXED = 32
 ICON_DRAG_THRESHOLD = 10
+ICON_EVENT_BOX_BASE_Y = -2
+ICON_CONTAINER_WIDTH = 52
 
 
 class DockIcon:
@@ -48,7 +50,7 @@ class DockIcon:
         """Create the icon widget with fixed size."""
         # Fixed size container - 52px width matching grip height
         self._container = Gtk.Fixed()
-        self._container.set_size_request(52, TAB_HEIGHT)
+        self._container.set_size_request(ICON_CONTAINER_WIDTH, TAB_HEIGHT)
 
         # EventBox to catch events (instead of Button)
         self._event_box = Gtk.EventBox()
@@ -56,7 +58,7 @@ class DockIcon:
         if self._is_group:
             tooltip = f"Grupo: {tooltip}"
         self._event_box.set_tooltip_text(tooltip)
-        self._event_box.set_size_request(52, TAB_HEIGHT)
+        self._event_box.set_size_request(ICON_CONTAINER_WIDTH, TAB_HEIGHT)
         self._event_box.set_above_child(False)
         self._event_box.add_events(
             Gdk.EventMask.BUTTON_PRESS_MASK
@@ -87,8 +89,9 @@ class DockIcon:
         self._indicator.connect("draw", self._on_draw_indicator)
 
         # Put in Fixed container - raise indicator by 2px
-        self._container.put(self._event_box, 0, -2)  # move up 2px
-        self._container.put(self._indicator, 0, TAB_HEIGHT - 8)
+        self._container.put(self._event_box, 0, ICON_EVENT_BOX_BASE_Y)
+        indicator_x = (ICON_CONTAINER_WIDTH - ICON_SIZE_FIXED) // 2
+        self._container.put(self._indicator, indicator_x, TAB_HEIGHT - 8)
         self._container.show_all()
 
         # Add to icons box - no expand
@@ -381,6 +384,10 @@ class DockIcon:
         self._current_zoom_size = ICON_SIZE_FIXED
 
     def _start_bounce_anim(self):
+        if self._bounce_timeout_id:
+            GLib.source_remove(self._bounce_timeout_id)
+            self._bounce_timeout_id = None
+
         offset = 0
         direction = -1
         collapse_scheduled = False
@@ -389,14 +396,15 @@ class DockIcon:
             nonlocal offset, direction, collapse_scheduled
             # Check if dock is still expanded
             if self._dock_instance and not self._dock_instance.is_expanded():
-                self._container.move(self._event_box, 0, 0)
+                self._container.move(self._event_box, 0, ICON_EVENT_BOX_BASE_Y)
+                self._bounce_timeout_id = None
                 return False
 
             offset += direction
             if offset <= -12:
                 direction = 1
             elif offset >= 0:
-                self._container.move(self._event_box, 0, 0)
+                self._container.move(self._event_box, 0, ICON_EVENT_BOX_BASE_Y)
                 # Schedule collapse after 2 seconds if not already scheduled
                 if not collapse_scheduled and self._dock_instance:
                     collapse_scheduled = True
@@ -405,7 +413,7 @@ class DockIcon:
                 offset = 0
                 direction = -1
                 return True
-            self._container.move(self._event_box, 0, offset)
+            self._container.move(self._event_box, 0, ICON_EVENT_BOX_BASE_Y + offset)
             return True
 
         self._bounce_timeout_id = GLib.timeout_add(24, bounce_step)
