@@ -285,6 +285,9 @@ class AppDatabase:
                 if existing["terminal"] != int(entry.terminal):
                     update_fields["terminal"] = int(entry.terminal)
                     needs_update = True
+                if existing.get("hidden", 0) != 0:
+                    update_fields["hidden"] = 0
+                    needs_update = True
                 if self._should_force_sudo(entry.name, entry.exec_cmd):
                     if existing.get("launch_sudo", 0) != 1:
                         update_fields["launch_sudo"] = 1

@@ -13,7 +13,7 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import Gtk, GdkPixbuf
 
-from config import EXCLUDED_DESKTOP, ICON_SIZE, AVAHI_DESKTOP_FILES
+from config import EXCLUDED_DESKTOP, EXCLUDED_APP_NAMES, ICON_SIZE, AVAHI_DESKTOP_FILES
 import config as _config
 
 
@@ -170,6 +170,8 @@ def _parse_desktop_file(filepath, filename):
         return None
 
     name = get("Name", filename)
+    if name.strip().lower() in EXCLUDED_APP_NAMES:
+        return None
     icon_name = get("Icon", "")
     comment = get("Comment", "")
     categories = get("Categories", "")

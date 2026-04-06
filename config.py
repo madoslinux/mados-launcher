@@ -73,13 +73,25 @@ EXCLUDED_DESKTOP = {
     "btop.desktop",
     "mados-equalizer.desktop",
     "vim.desktop",
-    "gufw.desktop",
     # LibreOffice - only keep Writer, Calc, Impress
     "libreoffice-startcenter.desktop",
     "libreoffice-draw.desktop",
     "libreoffice-base.desktop",
     "libreoffice-math.desktop",
     "libreoffice-xsltfilter.desktop",
+}
+
+EXCLUDED_APP_NAMES = {
+    "customize look and feel",
+    "qt5 settings",
+    "qt6 settings",
+    "easy effects",
+    "hardware locality lstopo",
+    "nvidia x server settings",
+    "preferred applications",
+    "rofi",
+    "kitty",
+    "mados-updater",
 }
 
 # --- State Persistence ---
@@ -107,4 +119,4 @@ TERMINAL_CMD = "foot -e"  # Command to run terminal apps (e.g., "foot -e", "kitt
 
 # --- Database ---
 APP_DB_PATH = os.path.join(CONFIG_DIR, "apps.db")
-GDKSUDO_CMD = "gksudo"  # Command for launching apps with sudo
+GDKSUDO_CMD = "sudo"  # Command for launching apps with sudo

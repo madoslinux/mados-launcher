@@ -21,6 +21,18 @@ ICON_EVENT_BOX_BASE_Y = -2
 ICON_CONTAINER_WIDTH = 52
 
 
+def _build_sudo_args(app_name: str, args: list[str]) -> list[str]:
+    sudo_parts = shlex.split(GDKSUDO_CMD)
+    if not sudo_parts:
+        return args
+    sudo_bin = os.path.basename(sudo_parts[0]).lower()
+    if sudo_bin == "sudo":
+        return sudo_parts + args
+    if sudo_bin == "pkexec":
+        return sudo_parts + args
+    return sudo_parts + ["--message", f"Launching {app_name}", "--"] + args
+
+
 class DockIcon:
     """Individual icon with its own event handlers."""
 
@@ -176,7 +188,7 @@ class DockIcon:
         try:
             args = shlex.split(exec_cmd)
             if with_sudo or self._app.get("launch_sudo"):
-                args = [GDKSUDO_CMD, "--message", f"Launching {self._app.get('name')}", "--"] + args
+                args = _build_sudo_args(self._app.get("name", "App"), args)
             elif in_terminal or self._app.get("terminal"):
                 terminal_cmd = TERMINAL_CMD.split()
                 args = terminal_cmd + args
@@ -252,7 +264,7 @@ class DockIcon:
         try:
             args = shlex.split(exec_cmd)
             if app.get("launch_sudo"):
-                args = [GDKSUDO_CMD, "--message", f"Launching {app.get('name')}", "--"] + args
+                args = _build_sudo_args(app.get("name", "App"), args)
             elif app.get("terminal"):
                 args = TERMINAL_CMD.split() + args
             subprocess.Popen(
