@@ -216,27 +216,19 @@ class DockIcon:
             menu.popup_at_pointer(event)
             return
 
-        launch_normal = Gtk.MenuItem(label="Iniciar")
-        launch_normal.connect("activate", lambda _: self._launch_app())
-        menu.append(launch_normal)
-
-        if self._app.get("terminal") or self._app.get("launch_sudo"):
-            submenu = Gtk.Menu()
-
-            launch_sub = Gtk.MenuItem(label="Iniciar como")
-            submenu.append(launch_sub)
-
-            if self._app.get("launch_sudo"):
-                sudo_item = Gtk.MenuItem(label="Con sudo")
-                sudo_item.connect("activate", lambda _: self._launch_app(with_sudo=True))
-                submenu.append(sudo_item)
+        if self._app.get("launch_sudo"):
+            launch_sudo = Gtk.MenuItem(label="Iniciar con sudo")
+            launch_sudo.connect("activate", lambda _: self._launch_app(with_sudo=True))
+            menu.append(launch_sudo)
+        else:
+            launch_normal = Gtk.MenuItem(label="Iniciar")
+            launch_normal.connect("activate", lambda _: self._launch_app())
+            menu.append(launch_normal)
 
             if self._app.get("terminal"):
-                term_item = Gtk.MenuItem(label="En terminal")
+                term_item = Gtk.MenuItem(label="Iniciar en terminal")
                 term_item.connect("activate", lambda _: self._launch_app(in_terminal=True))
-                submenu.append(term_item)
-
-            launch_sub.set_submenu(submenu)
+                menu.append(term_item)
 
         menu.append(Gtk.SeparatorMenuItem())
 
