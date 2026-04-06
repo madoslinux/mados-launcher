@@ -76,10 +76,41 @@ class AppDatabase:
         """Get a database connection."""
         return sqlite3.connect(self._db_path)
 
-    def _should_force_sudo(self, name: str, exec_cmd: str) -> bool:
+    def _should_force_sudo(self, name: str, exec_cmd: str, filename: str = "") -> bool:
         """Return True when app should always run with sudo by default."""
-        text = f"{name} {exec_cmd}".lower()
+        text = f"{name} {exec_cmd} {filename}".lower()
         return "gufw" in text
+
+    def dedupe_gufw(self) -> int:
+        """Hide duplicate GUFW entries, keeping one preferred desktop file."""
+        with self._get_conn() as conn:
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute(
+                """
+                SELECT id, name, filename, exec_cmd, launch_sudo
+                FROM apps
+                WHERE hidden = 0
+                  AND (lower(name) LIKE '%gufw%' OR lower(filename) LIKE '%gufw%' OR lower(exec_cmd) LIKE '%gufw%')
+                ORDER BY CASE WHEN filename = 'gufw.desktop' THEN 0 ELSE 1 END, id
+                """
+            ).fetchall()
+
+            if len(rows) <= 1:
+                return 0
+
+            keep_row = rows[0]
+            keep_id = keep_row["id"]
+            removed = 0
+            if keep_row["launch_sudo"] != 1:
+                conn.execute("UPDATE apps SET launch_sudo = 1 WHERE id = ?", (keep_id,))
+            for row in rows[1:]:
+                if row["id"] == keep_id:
+                    continue
+                conn.execute("UPDATE apps SET hidden = 1 WHERE id = ?", (row["id"],))
+                removed += 1
+
+            conn.commit()
+            return removed
 
     def _is_excluded_app(self, name: str, filename: str) -> bool:
         normalized_name = " ".join(
@@ -129,7 +160,11 @@ class AppDatabase:
         """Add a new application from a DesktopEntry."""
         max_pos = self._get_max_position()
         now = int(datetime.now().timestamp())
-        launch_sudo = 1 if self._should_force_sudo(entry.name, entry.exec_cmd) else 0
+        launch_sudo = (
+            1
+            if self._should_force_sudo(entry.name, entry.exec_cmd, entry.filename)
+            else 0
+        )
         with self._get_conn() as conn:
             cursor = conn.execute(
                 """
@@ -296,7 +331,7 @@ class AppDatabase:
                 if existing.get("hidden", 0) != 0:
                     update_fields["hidden"] = 0
                     needs_update = True
-                if self._should_force_sudo(entry.name, entry.exec_cmd):
+                if self._should_force_sudo(entry.name, entry.exec_cmd, entry.filename):
                     if existing.get("launch_sudo", 0) != 1:
                         update_fields["launch_sudo"] = 1
                         needs_update = True
@@ -322,6 +357,7 @@ class AppDatabase:
                     self.hide_app(row["id"])
                     removed += 1
 
+        removed += self.dedupe_gufw()
         return (added, updated, removed)
 
     def backup(self, backup_path: Optional[str] = None):

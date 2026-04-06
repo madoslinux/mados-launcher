@@ -98,6 +98,11 @@ def _resolve_icon(icon_name, size=ICON_SIZE):
         return None
 
 
+def _is_gufw_entry(name: str, filename: str, exec_cmd: str) -> bool:
+    text = f"{name} {filename} {exec_cmd}".lower()
+    return "gufw" in text
+
+
 def _is_avahi_running():
     """Check whether avahi-daemon is currently active via systemctl."""
     try:
@@ -116,11 +121,12 @@ def scan_desktop_entries():
     """Scan standard directories for .desktop files and return sorted list of DesktopEntry."""
     entries = {}
     avahi_active = _is_avahi_running()
+    selected_gufw_filename = None
 
     for directory in _config.DESKTOP_DIRS:
         if not os.path.isdir(directory):
             continue
-        for fname in os.listdir(directory):
+        for fname in sorted(os.listdir(directory)):
             if not fname.endswith(".desktop"):
                 continue
             if fname in EXCLUDED_DESKTOP:
@@ -134,6 +140,17 @@ def scan_desktop_entries():
             filepath = os.path.join(directory, fname)
             entry = _parse_desktop_file(filepath, fname)
             if entry:
+                if _is_gufw_entry(entry.name, entry.filename, entry.exec_cmd):
+                    if selected_gufw_filename is None:
+                        selected_gufw_filename = fname
+                    elif (
+                        fname == "gufw.desktop"
+                        and selected_gufw_filename != "gufw.desktop"
+                    ):
+                        entries.pop(selected_gufw_filename, None)
+                        selected_gufw_filename = fname
+                    else:
+                        continue
                 entries[fname] = entry
 
     # Sort alphabetically by display name
