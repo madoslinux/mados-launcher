@@ -1,6 +1,7 @@
 """SQLite database for managing launcher applications."""
 
 import os
+import re
 import sqlite3
 import shutil
 import time
@@ -8,6 +9,7 @@ from datetime import datetime
 from typing import Optional
 
 from logger import log
+from config import EXCLUDED_DESKTOP, EXCLUDED_APP_NAMES
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS apps (
@@ -78,6 +80,12 @@ class AppDatabase:
         """Return True when app should always run with sudo by default."""
         text = f"{name} {exec_cmd}".lower()
         return "gufw" in text
+
+    def _is_excluded_app(self, name: str, filename: str) -> bool:
+        normalized_name = " ".join(
+            re.sub(r"[^a-z0-9]+", " ", (name or "").lower()).split()
+        )
+        return filename in EXCLUDED_DESKTOP or normalized_name in EXCLUDED_APP_NAMES
 
     def get_all_apps(self) -> list[dict]:
         """Get all applications ordered by position."""
@@ -302,10 +310,14 @@ class AppDatabase:
 
         with self._get_conn() as conn:
             conn.row_factory = sqlite3.Row
-            cursor = conn.execute("SELECT id, filename FROM apps WHERE hidden = 0")
+            cursor = conn.execute("SELECT id, name, filename FROM apps WHERE hidden = 0")
             all_apps = cursor.fetchall()
             removed = 0
             for row in all_apps:
+                if self._is_excluded_app(row["name"], row["filename"]):
+                    self.hide_app(row["id"])
+                    removed += 1
+                    continue
                 if row["filename"] not in existing_filenames:
                     self.hide_app(row["id"])
                     removed += 1

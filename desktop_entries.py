@@ -22,6 +22,11 @@ import config as _config
 _FIELD_CODE_RE = re.compile(r" ?%[fFuUdDnNickvm](?:\s|$)")
 
 
+def _normalize_app_name(name: str) -> str:
+    cleaned = re.sub(r"[^a-z0-9]+", " ", name.lower())
+    return " ".join(cleaned.split())
+
+
 class DesktopEntry:
     """Represents a parsed .desktop application entry."""
 
@@ -170,7 +175,7 @@ def _parse_desktop_file(filepath, filename):
         return None
 
     name = get("Name", filename)
-    if name.strip().lower() in EXCLUDED_APP_NAMES:
+    if _normalize_app_name(name) in EXCLUDED_APP_NAMES:
         return None
     icon_name = get("Icon", "")
     comment = get("Comment", "")

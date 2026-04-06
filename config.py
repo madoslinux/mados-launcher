@@ -72,7 +72,9 @@ EXCLUDED_DESKTOP = {
     "htop.desktop",
     "btop.desktop",
     "mados-equalizer.desktop",
+    "mados-updater.desktop",
     "vim.desktop",
+    "rofi-theme-selector.desktop",
     # LibreOffice - only keep Writer, Calc, Impress
     "libreoffice-startcenter.desktop",
     "libreoffice-draw.desktop",
@@ -90,8 +92,10 @@ EXCLUDED_APP_NAMES = {
     "nvidia x server settings",
     "preferred applications",
     "rofi",
+    "rofi theme selector",
     "kitty",
     "mados-updater",
+    "mados updater",
 }
 
 # --- State Persistence ---
